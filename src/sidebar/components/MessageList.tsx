@@ -7,10 +7,12 @@ import clsx from 'clsx';
 interface MessageListProps {
   messages: Message[];
   showThinking?: boolean;
+  onEditMessage?: (messageId: string, content: string) => void;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({ messages, showThinking = true }) => {
+export const MessageList: React.FC<MessageListProps> = ({ messages, showThinking = true, onEditMessage }) => {
   const [expandedThinking, setExpandedThinking] = useState<Set<string>>(new Set());
+  const [copiedMessageId, setCopiedMessageId] = useState<string | null>(null);
   
   const toggleThinking = (messageId: string) => {
     setExpandedThinking(prev => {
@@ -22,6 +24,28 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, showThinking
       }
       return next;
     });
+  };
+
+  const handleCopyMessage = async (messageId: string, content: string) => {
+    try {
+      // Extract main content without thinking tags
+      const { mainContent } = extractThinkingContent(content);
+      
+      // Remove HTML tags for plain text copy
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = DOMPurify.sanitize(marked.parse(mainContent) as string);
+      const plainText = tempDiv.textContent || tempDiv.innerText || '';
+      
+      await navigator.clipboard.writeText(plainText);
+      setCopiedMessageId(messageId);
+      
+      // Reset copied state after 2 seconds
+      setTimeout(() => {
+        setCopiedMessageId(null);
+      }, 2000);
+    } catch (error) {
+      console.error('Failed to copy message:', error);
+    }
   };
 
   const extractThinkingContent = (content: string, isStreaming?: boolean) => {
@@ -140,6 +164,38 @@ export const MessageList: React.FC<MessageListProps> = ({ messages, showThinking
               </div>
             )}
             {message.content && renderMessageContent(message.content, message.isStreaming, message.id)}
+            {message.role === 'user' && message.content && !message.isStreaming && (
+              <button
+                className="edit-button"
+                onClick={() => onEditMessage?.(message.id, message.content)}
+                title="Edit message"
+              >
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+            )}
+            {message.role === 'assistant' && message.content && !message.isStreaming && (
+              <button
+                className={clsx('copy-button', {
+                  'copied': copiedMessageId === message.id
+                })}
+                onClick={() => handleCopyMessage(message.id, message.content)}
+                title={copiedMessageId === message.id ? 'Copied!' : 'Copy message'}
+              >
+                {copiedMessageId === message.id ? (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M20 6L9 17l-5-5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                ) : (
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                  </svg>
+                )}
+              </button>
+            )}
           </div>
         </div>
       ))}

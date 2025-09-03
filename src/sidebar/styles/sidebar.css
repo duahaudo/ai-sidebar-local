@@ -203,6 +203,7 @@ body {
   padding: 10px 14px;
   border-radius: 12px;
   word-wrap: break-word;
+  position: relative;
 }
 
 .message.user .message-bubble {
@@ -213,6 +214,121 @@ body {
 .message.assistant .message-bubble {
   background: #f3f4f6;
   color: #1f2937;
+}
+
+/* Copy Button */
+.copy-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.message.assistant .message-bubble:hover .copy-button {
+  opacity: 1;
+  visibility: visible;
+}
+
+.copy-button:hover {
+  background: #ffffff;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.copy-button.copied {
+  background: #10b981;
+  border-color: #10b981;
+  opacity: 1;
+  visibility: visible;
+}
+
+.copy-button svg {
+  color: #6b7280;
+  width: 16px;
+  height: 16px;
+}
+
+.copy-button.copied svg {
+  color: white;
+}
+
+/* Edit Button */
+.edit-button {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 6px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.message.user .message-bubble:hover .edit-button {
+  opacity: 1;
+  visibility: visible;
+}
+
+.edit-button:hover {
+  background: #ffffff;
+  border-color: #d1d5db;
+  transform: scale(1.05);
+}
+
+.edit-button svg {
+  color: #6b7280;
+  width: 16px;
+  height: 16px;
+}
+
+/* Cancel Edit Button */
+.cancel-edit-button {
+  background: #ef4444;
+  border: none;
+  border-radius: 6px;
+  padding: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  margin-right: 8px;
+}
+
+.cancel-edit-button:hover {
+  background: #dc2626;
+  transform: scale(1.05);
+}
+
+.cancel-edit-button svg {
+  color: white;
+  width: 20px;
+  height: 20px;
+}
+
+/* Send button editing state */
+.send-button.editing {
+  background: #3b82f6;
+}
+
+.send-button.editing:hover:not(.disabled) {
+  background: #2563eb;
 }
 
 /* Message Content Markdown Styles */

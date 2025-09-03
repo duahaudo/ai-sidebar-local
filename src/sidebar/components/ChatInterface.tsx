@@ -8,13 +8,19 @@ interface ChatInterfaceProps {
   isLoading: boolean;
   onSendMessage: (message: string) => void;
   showThinking?: boolean;
+  editingMessage?: { id: string; content: string } | null;
+  onEditMessage?: (messageId: string, content: string) => void;
+  onCancelEdit?: () => void;
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   messages,
   isLoading,
   onSendMessage,
-  showThinking = true
+  showThinking = true,
+  editingMessage,
+  onEditMessage,
+  onCancelEdit
 }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -25,11 +31,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   return (
     <div className="chat-interface">
-      <MessageList messages={messages} showThinking={showThinking} />
+      <MessageList messages={messages} showThinking={showThinking} onEditMessage={onEditMessage} />
       <div ref={messagesEndRef} />
       <InputArea 
         onSend={onSendMessage}
         disabled={isLoading}
+        initialValue={editingMessage?.content || ''}
+        editingMessageId={editingMessage?.id || null}
+        onCancelEdit={onCancelEdit}
       />
     </div>
   );

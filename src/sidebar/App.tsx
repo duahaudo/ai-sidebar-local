@@ -15,6 +15,7 @@ export const App: React.FC = () => {
   const [showThinking, setShowThinking] = useState(true);
   const [currentConversationId, setCurrentConversationId] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
+  const [editingMessage, setEditingMessage] = useState<{ id: string; content: string } | null>(null);
   const resizeRef = useRef<HTMLDivElement>(null);
   
   const { settings, updateSettings, conversations, saveConversation, deleteConversation } = useStorage();
@@ -138,6 +139,17 @@ export const App: React.FC = () => {
   const handleSendMessage = async (text: string) => {
     if (!text.trim() || isLoading) return;
 
+    // If editing, remove all messages from the edited message onwards
+    if (editingMessage) {
+      const messageIndex = messages.findIndex(m => m.id === editingMessage.id);
+      if (messageIndex !== -1) {
+        // Remove the edited message and all subsequent messages
+        const newMessages = messages.slice(0, messageIndex);
+        setMessages(newMessages);
+      }
+      setEditingMessage(null);
+    }
+
     setIsLoading(true);
     
     // Get page context
@@ -229,6 +241,15 @@ export const App: React.FC = () => {
 
   const handleNewChat = () => {
     createNewConversation();
+    setEditingMessage(null);
+  };
+
+  const handleEditMessage = (messageId: string, content: string) => {
+    setEditingMessage({ id: messageId, content });
+  };
+
+  const handleCancelEdit = () => {
+    setEditingMessage(null);
   };
 
   const handleClose = () => {
@@ -297,6 +318,9 @@ export const App: React.FC = () => {
         isLoading={isLoading}
         onSendMessage={handleSendMessage}
         showThinking={showThinking}
+        editingMessage={editingMessage}
+        onEditMessage={handleEditMessage}
+        onCancelEdit={handleCancelEdit}
       />
       
       {showSettings && (
